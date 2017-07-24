@@ -1,0 +1,70 @@
+<input id="address" type="hidden" value="<%= @apartment.street1 %>,<%= @apartment.street2 %>,<%= @apartment.city %>,<%= @apartment.state %>,
+<%= @apartment.postal_code %>">
+<div id="showmap"></div>
+<script>
+function initMap() {
+  fetch('markers.json')
+  .then(function(response){return response.json()})
+  .then(plotMarkers);
+
+  var markers;
+  var bounds;
+
+  function plotMarkers(m)
+  {
+    markers = [];
+    bounds = new google.maps.LatLngBounds();
+
+    m.forEach(function (marker) {
+      var position = new google.maps.LatLng(marker.lat, marker.lng);
+
+      markers.push(
+        new google.maps.Marker({
+          position: position,
+          map: map,
+          animation: google.maps.Animation.DROP
+        })
+      );
+
+      bounds.extend(position);
+    });
+
+    map.fitBounds(bounds);
+  }
+  var position = new google.maps.LatLng(this.lat, this.lng);
+
+  markers.push(
+    new google.maps.Marker({
+      position: position,
+      map: map,
+      animation: google.maps.Animation.DROP
+    })
+  );
+
+  bounds.extend(position);
+  var map = new google.maps.Map(document.getElementById('showmap'), {
+    zoom: 12,
+    center: {lat: 32.70961, lng: -117.1579991}
+  });
+  var geocoder = new google.maps.Geocoder();
+
+  function geocodeme() {
+    geocodeAddress(geocoder, map);
+  };
+  geocodeme()
+}
+
+function geocodeAddress(geocoder, resultsMap) {
+  var address = document.getElementById('address').value;
+  geocoder.geocode({'address': address}, function(results, status) {
+    if (status === 'OK') {
+      resultsMap.setCenter(results[0].geometry.location);
+      var marker = new google.maps.Marker({
+        map: resultsMap,
+        position: results[0].geometry.location
+      });
+    } else {
+      alert('Geocode was not successful for the following reason: ' + status);
+    }
+  });
+}

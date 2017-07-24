@@ -1,0 +1,135 @@
+  <!-- <script>
+        $(document).ready(function(){ -->
+
+        <!-- //   var coordinates = new google.maps.LatLng(44.435,-101);
+        //   var mapOptions = {
+        //     center: coordinates,
+        //     zoom:15,
+        //     position: myLatLng
+        //   };
+        //   var mapContainer = $("#googleMap")[0];
+        //   var map = new google.maps.Map(mapContainer, mapOptions);
+        // });
+//   </script>
+// <div id="map" style="width: 1200px; height: 600px;"></div> -->
+<style>
+  /* Always set the map height explicitly to define the size of the div
+   * element that contains the map. */
+  #map {
+    height: 50vh;
+  }
+  /* Optional: Makes the sample page fill the window. */
+  html, body {
+    height: 100%;
+    margin: 0;
+    padding: 0;
+  }
+</style>
+</head>
+<body>
+<div id="map"></div>
+<script>
+
+document.addEventListener('DOMContentLoaded', function () {
+  if (document.querySelectorAll('#map').length > 0)
+  {
+    if (document.querySelector('html').lang)
+      lang = document.querySelector('html').lang;
+    else
+      lang = 'en';
+
+    var js_file = document.createElement('script');
+    js_file.type = 'text/javascript';
+    js_file.src = 'https://maps.googleapis.com/maps/api/js?callback=initMap&signed_in=true&language=' + lang;
+    document.getElementsByTagName('head')[0].appendChild(js_file);
+  }
+});
+
+var map;
+
+function initMap()
+{
+  map = new google.maps.Map(document.getElementById('map'), {
+    center: {lat: 33.397, lng: -115.644},
+    zoom: 8
+  });
+
+  fetch('apartments.json')
+    .then(function(response){return response.json()})
+    .then(plotMarkers);
+}
+
+var markers;
+var bounds;
+
+function plotMarkers(m)
+{
+  markers = [];
+  bounds = new google.maps.LatLngBounds();
+
+  m.forEach(function (marker) {
+    var position = new google.maps.LatLng(marker.latitude, marker.longitude);
+
+    markers.push(
+      new google.maps.Marker({
+        position: position,
+        map: map,
+        animation: google.maps.Animation.DROP
+      })
+    );
+
+    bounds.extend(position);
+  });
+
+  map.fitBounds(bounds);
+}
+</script>
+
+// <p id="notice"><%= notice %></p>
+
+<h1>Apartments</h1>
+
+<table>
+  <thead>
+    <tr>
+      <th>Street1 |</th>
+      <th>Street2 |</th>
+      <th>City |</th>
+      <th>Postal code |</th>
+      <th>State |</th>
+      <th>Country |</th>
+      <th>Name |</th>
+      <th>Phone number |</th>
+      <th>Open |</th>
+      <th>Close |</th>
+      <th>Latitude |</th>
+      <th>Longitude |</th>
+      <th colspan="3"></th>
+    </tr>
+  </thead>
+
+  <tbody>
+    <% @apartments.each do |apartment| %>
+      <tr>
+        <td><%= apartment.street1 %></td>
+        <td><%= apartment.street2 %></td>
+        <td><%= apartment.city %></td>
+        <td><%= apartment.postal_code %></td>
+        <td><%= apartment.state %></td>
+        <td><%= apartment.country %></td>
+        <td><%= apartment.name %></td>
+        <td><%= apartment.phone_number %></td>
+        <td><%= apartment.hours.strftime(" %H:%M")  %></td>
+        <td><%= apartment.closing.strftime("%H:%M")  %></td>
+        <td><%= apartment.latitude %></td><td><%= apartment.longitude %></td>
+        <td><%= link_to 'Show', apartment %></td>
+        <td><%= link_to 'Edit', edit_apartment_path(apartment) %></td>
+        <td><%= link_to 'Destroy', apartment, method: :delete, data: { confirm: 'Are you sure?' } %></td>
+      </tr>
+    <% end %>
+  </tbody>
+</table>
+
+<br>
+
+<%= link_to 'New Apartment', new_apartment_path %>
